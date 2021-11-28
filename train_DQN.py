@@ -3,11 +3,11 @@ from itertools import count
 
 import torch
 import torch.nn as nn
+import torch.optim as optim
 
 from network import DQN, optimize
 from utils import get_screen, ReplayMemory, Action_Selector, plot_durations
-from vars import TARGET_UPDATE
-import random
+from vars import TARGET_UPDATE, N_EPISODE
 
 env = gym.make('CartPole-v0').unwrapped
 env.reset()
@@ -27,7 +27,7 @@ loss_func = nn.SmoothL1Loss()
 memory = ReplayMemory(10000)
 episode_durations = []
 
-for i in range(5000):
+for i in range(N_EPISODE):
     env.reset()
     last_screen = get_screen(env)
     current_screen = get_screen(env)
@@ -50,7 +50,7 @@ for i in range(5000):
             state = next_state
 
         optimize(memory, policy_net, target_net, optimizer, loss_func)
-
+        
         if done:
             episode_durations.append(t + 1)
             plot_durations(episode_durations)
