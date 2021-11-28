@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from network import DQN, optimize
+from network import DQN, Attacker, optimize_attacker
 from utils import get_screen, ReplayMemory, Action_Selector, plot_durations
 from vars import TARGET_UPDATE, N_EPISODE
 
@@ -17,12 +17,13 @@ init_screen = get_screen(env)
 _, _, screen_height, screen_width = init_screen.shape
 n_actions = env.action_space.n
 
-policy_net = DQN(screen_height, screen_width, n_actions)
 target_net = DQN(screen_height, screen_width, n_actions)
-target_net.load_state_dict(policy_net.state_dict())
+target_net.load_state_dict(torch.load('models/target_net.pth'))
 target_net.eval()
 
-optimizer = optim.RMSprop(policy_net.parameters(), lr=1e-3)
+attacker = Attacker(target_net, norm_bound=1)
+
+optimizer = optim.RMSprop(Attacker.parameters(), lr=1e-3)
 loss_func = nn.SmoothL1Loss()
 memory = ReplayMemory(10000)
 episode_durations = []
@@ -31,9 +32,8 @@ for i in range(N_EPISODE):
     env.reset()
     state = get_screen(env)
     for t in count():
-        
         if state is not None:
-            action = action_selector.select_action(policy_net, state)
+            action = action_selector.select_action(target_net, state, attacker)
             _, reward, done, _ = env.step(action.item())
             reward = torch.Tensor([reward])
             
@@ -46,7 +46,7 @@ for i in range(N_EPISODE):
 
             state = next_state
 
-        optimize(memory, policy_net, target_net, optimizer, loss_func)
+        optimize_attacker(memory, target_net, attacker, optimizer, loss_func)
         
         if done:
             episode_durations.append(t + 1)
@@ -54,6 +54,4 @@ for i in range(N_EPISODE):
             break
 
     if i % TARGET_UPDATE == 0:
-        target_net.load_state_dict(policy_net.state_dict())
-        torch.save(target_net.state_dict(), f'models/target_net.pth')
-
+        torch.save(attacker.state_dict(), f'models/attacker.pth')

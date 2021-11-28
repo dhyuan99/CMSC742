@@ -52,14 +52,18 @@ class Action_Selector:
         self.EPS_DECAY = EPS_DECAY
         self.steps_done = 0
 
-    def select_action(self, DQN, state):
+    def select_action(self, DQN, state, attacker=None):
         sample = random.random()
         eps_threshold = self.EPS_END + (self.EPS_START - self.EPS_END) * \
             math.exp(-1. * self.steps_done / self.EPS_DECAY)
         self.steps_done += 1
         if sample > eps_threshold:
             with torch.no_grad():
-                return DQN(state).max(1)[1].view(1, 1)
+                if attacker is None:
+                    return DQN(state).max(1)[1].view(1, 1)
+                else:
+                    DQN(state)
+                    return attacker(DQN).max(1)[1].view(1, 1)
         else:
             return torch.tensor([[random.randrange(DQN.n_actions)]], dtype=torch.long)
 
