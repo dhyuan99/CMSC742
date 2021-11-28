@@ -1,19 +1,8 @@
 import gym
-import math
-import random
-import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-from collections import namedtuple, deque
 from itertools import count
-from PIL import Image
 
 import torch
 import torch.nn as nn
-from torch.nn.modules import loss
-import torch.optim as optim
-import torch.nn.functional as F
-import torchvision.transforms as T
 
 from network import DQN, optimize
 from utils import get_screen, ReplayMemory, Action_Selector, plot_durations
@@ -38,13 +27,12 @@ loss_func = nn.SmoothL1Loss()
 memory = ReplayMemory(10000)
 episode_durations = []
 
-for i in range(50):
+for i in range(5000):
     env.reset()
     last_screen = get_screen(env)
     current_screen = get_screen(env)
     state = last_screen - current_screen
     for t in count():
-        print(i, t)
         if state is not None:
             action = action_selector.select_action(policy_net, state)
             _, reward, done, _ = env.step(action.item())
@@ -62,6 +50,7 @@ for i in range(50):
             state = next_state
 
         optimize(memory, policy_net, target_net, optimizer, loss_func)
+
         if done:
             episode_durations.append(t + 1)
             plot_durations(episode_durations)
