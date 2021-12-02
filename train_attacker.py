@@ -39,7 +39,6 @@ for i in range(N_EPISODES):
                 optimizer.step()
 
     durations.append(duration)
-    print(sum(durations) / len(durations))
     if duration <= min(durations):
         best_attacker = copy.deepcopy(attacker)
 
@@ -56,3 +55,5 @@ for i in range(10):
         obs, reward, done, _ = env.step(A.item())
         r += 1
     print(f'episode {i}, duration {r}.')
+
+torch.save(best_attacker.state_dict(), 'models/attacker.pth')

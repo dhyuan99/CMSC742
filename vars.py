@@ -10,5 +10,5 @@ LR = 1e-3
 HIDDEN_LAYER_SIZE = 64
 
 # Below is for attacker training.
-NUM_LAYERS = 2
+NUM_LAYERS = 5
 NORM_BOUND = 100
