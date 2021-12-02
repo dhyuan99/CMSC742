@@ -60,8 +60,12 @@ for i in range(attack_cfg['n_episodes']):
         best_attacker = copy.deepcopy(attacker)
 
 fit1 = SimpleExpSmoothing(durations, initialization_method="heuristic").fit(smoothing_level=0.05, optimized=False)
+plt.plot(durations)
 plt.plot(fit1.fittedvalues)
-plt.savefig('hello.jpg')
+plt.xlabel("Episodes")
+plt.ylabel("Duration")
+plt.title("Performance of the Attacker as Training.")
+plt.savefig(attack_cfg['figpath'])
 plt.close()
 
 env = gym.make('CartPole-v0')
@@ -74,4 +78,4 @@ for i in range(1000):
         r += 1
 print(f'Try 1000 episodes. Average reward is {r / 1000}.')
 
-torch.save(best_attacker.state_dict(), 'models/attacker.pth')
+torch.save(best_attacker.state_dict(), attack_cfg["savepath"])

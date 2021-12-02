@@ -6,9 +6,13 @@ The goal of the project is to improve the robustness of deep Q-learning by addin
 
 We use CartPole as the environment setting and show the randomized smoothing does not affect the performance of the agent, while improve the robustness against attack.
 
-1. Install the required packages:
+0. Install the required packages:
 
 `pip install -r requirements.txt`
+
+1. Test the performance of a dummy agent, which randomly selects actions.
+
+`python test_random.py`
 
 2. Train an agent without regularization:
 
