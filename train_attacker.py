@@ -33,9 +33,9 @@ for i in range(N_EPISODES):
         if(index > EXP_REPLAY_SIZE / 2):
             index = 0
             for _ in range(4):
-                loss = -agent.compute_loss(batch_size=BATCH_SIZE)
+                loss, _ = agent.compute_loss(batch_size=BATCH_SIZE)
                 optimizer.zero_grad()
-                loss.backward(retain_graph=True)
+                (-loss).backward(retain_graph=True)
                 optimizer.step()
 
     durations.append(duration)
