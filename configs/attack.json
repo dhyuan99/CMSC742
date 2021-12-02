@@ -1,0 +1,6 @@
+{
+    "lr": 1e-3,
+    "norm_bound": 1,
+    "num_layers": 5,
+    "n_episodes": 10000
+}

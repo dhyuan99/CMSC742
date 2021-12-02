@@ -1,0 +1,15 @@
+{
+    "savepath": "models/agent_robust.pth",
+    "figpath": "figs/agent_robust.jpg",
+    "hidden_layer_size": 64,
+    "lr": 1e-3,
+    "sync_freq": 5,
+    "exp_replay_size": 256,
+    "gamma": 0.95,
+    "eps_start": 1,
+    "eps_end": 0.05,
+    "eps_decay": 5000,
+    "n_episodes": 10000,
+    "batch_size": 16,
+    "reg": {"K": 3, "gamma": 2, "sigma": 0.5, "lambda": 0.01}
+}

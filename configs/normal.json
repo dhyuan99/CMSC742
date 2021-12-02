@@ -1,0 +1,15 @@
+{
+    "savepath": "models/agent_normal.pth",
+    "figpath": "figs/agent_normal.jpg",
+    "hidden_layer_size": 64,
+    "lr": 1e-3,
+    "sync_freq": 5,
+    "exp_replay_size": 256,
+    "gamma": 0.95,
+    "eps_start": 1,
+    "eps_end": 0.05,
+    "eps_decay": 5000,
+    "n_episodes": 10000,
+    "batch_size": 16,
+    "reg": null
+}
