@@ -9,9 +9,8 @@ class Attacker(nn.Module):
             act = nn.Tanh()
             layers += (linear, act)
         self.layers = nn.Sequential(*layers)
-        self.hidden_layer_size = hidden_layer_size
         self.norm_bound = norm_bound
 
     def forward(self, x):
-        return self.layers(x) / self.hidden_layer_size * self.norm_bound
+        return self.layers(x) * self.norm_bound
         
