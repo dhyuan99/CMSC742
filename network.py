@@ -16,15 +16,29 @@ class DQN_Agent:
         self.network_sync_freq = sync_freq
         self.network_sync_counter = 0
         self.gamma = torch.tensor(gamma).float()
-        self.experience_replay = deque(maxlen = exp_replay_size)  
-        return
+        self.exp_replay_size = exp_replay_size
+        self.experience_replay = deque(maxlen=exp_replay_size)  
+
+    def initialize(self, env):
+        index = 0
+        for _ in range(self.exp_replay_size):
+            obs = env.reset()
+            done = False
+            while (not done):
+                A = self.get_action(obs, env.action_space.n, epsilon=1)
+                obs_next, reward, done, _ = env.step(A.item())
+                self.collect_experience([obs, A.item(), reward, obs_next])
+                obs = obs_next
+                index += 1
+                if(index > self.exp_replay_size):
+                    break
         
     def build_nn(self, layer_sizes):
         assert len(layer_sizes) > 1
         layers = []
         for index in range(len(layer_sizes)-1):
             linear = nn.Linear(layer_sizes[index], layer_sizes[index+1])
-            act =    nn.Tanh() if index < len(layer_sizes)-2 else nn.Identity()
+            act = nn.Tanh() if index < len(layer_sizes)-2 else nn.Identity()
             layers += (linear,act)
         return nn.Sequential(*layers)
     
@@ -48,7 +62,6 @@ class DQN_Agent:
     
     def collect_experience(self, experience):
         self.experience_replay.append(experience)
-        return
     
     def sample_from_experience(self, sample_size):
         if(len(self.experience_replay) < sample_size):
