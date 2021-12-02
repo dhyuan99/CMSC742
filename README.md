@@ -7,12 +7,21 @@ The goal of the project is to improve the robustness of deep Q-learning by addin
 We use CartPole as the environment setting and show the randomized smoothing does not affect the performance of the agent, while improve the robustness against attack.
 
 1. Install the required packages:
+
 `pip install -r requirements.txt`
+
 2. Train an agent without regularization:
+
 `python train_DQN.py -config configs/normal.json`
+
 3. Train an agent with regularization:
+
 `python train_DQN.py -config configs/robust.json`
+
 4. Attack the normal agent:
+
 `python train_attacker.py -attack_config configs/attack.json -agent_config configs/normal.json`
+
 5. Attack the robust agent:
+
 `python train_attacker.py -attack_config configs/attack.json -agent_config configs/robust.json`
