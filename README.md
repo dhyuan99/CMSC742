@@ -8,11 +8,11 @@ We use CartPole as the environment setting and show the randomized smoothing doe
 
 1. Install the required packages:
 `pip install -r requirements.txt`
-2. Train an agent without attacking:
-`python train_DQN.py`
-3. After training the agent, it will be stored in `models/Agent.pth`. To attack the agent:
-`python train_attacker.py`
-4. Train an agent with random smoothing:
-`python train_DQN.py`
-5. After training the agent, it will be stored in 'models/Agent_robust.pth'. To attack the robust agent:
-`python train_attacker.py`
+2. Train an agent without regularization:
+`python train_DQN.py -config configs/normal.json`
+3. Train an agent with regularization:
+`python train_DQN.py -config configs/robust.json`
+4. Attack the normal agent:
+`python train_attacker.py -attack_config configs/attack.json -agent_config configs/normal.json`
+5. Attack the robust agent:
+`python train_attacker.py -attack_config configs/attack.json -agent_config configs/robust.json`
