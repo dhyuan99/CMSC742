@@ -1,1 +1,3 @@
-This is the project code for CMSC742 project.
+## CMSC742 Course Project
+### Adversarial Communication in Multi-Agent Reinforcement Learning System
+Chenghao Deng, Haowei Deng, Dehao Yuan
