@@ -17,7 +17,10 @@ class Agent:
         self.network_sync_counter = 0
         self.gamma = gamma
         self.exp_replay_size = exp_replay_size
-        self.experience_replay = deque(maxlen=exp_replay_size)  
+        self.experience_replay = deque(maxlen=exp_replay_size)
+
+        self.relu = nn.ReLU()
+        self.icdf = torch.distributions.normal.Normal(0,1).icdf
 
     def initialize(self, env):
         index = 0
@@ -79,8 +82,8 @@ class Agent:
         sn = torch.tensor([exp[3] for exp in sample]).float()   
         return s, a, rn, sn
     
-    def compute_loss(self, batch_size):
-        s, _, rn, sn = self.sample_from_experience( sample_size = batch_size)
+    def compute_loss(self, batch_size, reg=False):
+        s, a, rn, sn = self.sample_from_experience( sample_size = batch_size)
         if(self.network_sync_counter == self.network_sync_freq):
             self.target_net.load_state_dict(self.q_net.state_dict())
             self.network_sync_counter = 0
@@ -93,9 +96,22 @@ class Agent:
         q_next = self.get_q_next(sn)
         target_return = rn + self.gamma * q_next
         
-        loss = self.loss_fn(pred_return, target_return)
-        self.network_sync_counter += 1       
-        return loss
+        q_loss = self.loss_fn(pred_return, target_return)
+        self.network_sync_counter += 1
+
+        reg_loss = None
+        if reg:
+            K, sigma, gamma, lambd = reg['K'], reg['sigma'], reg['gamma'], reg['lambda']
+            for i in range(len(self.q_net)-2):
+                s = self.q_net[i](s)
+            si = [s+torch.randn(size=s.shape) * sigma for _ in range(K)]
+            ai = [self.q_net[-1](self.q_net[-2](s)) for s in si]
+            ai = [torch.exp(a) / torch.sum(torch.exp(a), axis=1, keepdim=True) for a in ai]
+            ai = torch.stack(ai, axis=2)
+            eps = 1e-3
+            ai = self.icdf((1-eps) * torch.mean(ai, axis=2) + eps / 2)
+            reg_loss = lambd * torch.mean(self.relu(gamma - self.relu((ai[:,1] - ai[:,0]) * (2 * a - 1))))
+        return q_loss, reg_loss
 
     def save(self, path):
         print(f'model saved at {path}')
