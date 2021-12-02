@@ -4,7 +4,7 @@ from collections import deque
 import random
 import copy
 
-class DQN_Agent:
+class Agent:
     
     def __init__(self, seed, layer_sizes, lr, sync_freq, exp_replay_size, gamma):
         torch.manual_seed(seed)
@@ -15,7 +15,7 @@ class DQN_Agent:
         
         self.network_sync_freq = sync_freq
         self.network_sync_counter = 0
-        self.gamma = torch.tensor(gamma).float()
+        self.gamma = gamma
         self.exp_replay_size = exp_replay_size
         self.experience_replay = deque(maxlen=exp_replay_size)  
 
@@ -43,17 +43,23 @@ class DQN_Agent:
         return nn.Sequential(*layers)
     
     def get_action(self, state, action_space_len, epsilon, attacker=None):
-        # We do not require gradient at this point, because this function will be used either
-        # during experience collection or during inference
         if attacker is None:
             with torch.no_grad():
                 Qp = self.q_net(torch.from_numpy(state).float())
             _, A = torch.max(Qp, axis=0)
-            A = A if torch.rand(1,).item() > epsilon else torch.randint(0,action_space_len,(1,))
+            A = A if torch.rand(1,).item() > epsilon else torch.randint(0, action_space_len, (1,))
             return A
         else:
-            pass
-    
+            with torch.no_grad():
+                x = torch.from_numpy(state).float()
+                for i in range(len(self.q_net)-2):
+                    x = self.q_net[i](x)
+                x += attacker(x)
+                Qp = self.q_net[-1](self.q_net[-2](x))
+            _, A = torch.max(Qp, axis=0)
+            A = A if torch.rand(1,).item() > epsilon else torch.randint(0, action_space_len, (1,))
+            return A
+                
     def get_q_next(self, state):
         with torch.no_grad():
             qp = self.target_net(state)
@@ -73,8 +79,8 @@ class DQN_Agent:
         sn = torch.tensor([exp[3] for exp in sample]).float()   
         return s, a, rn, sn
     
-    def train(self, batch_size ):
-        s, a, rn, sn = self.sample_from_experience( sample_size = batch_size)
+    def compute_loss(self, batch_size):
+        s, _, rn, sn = self.sample_from_experience( sample_size = batch_size)
         if(self.network_sync_counter == self.network_sync_freq):
             self.target_net.load_state_dict(self.q_net.state_dict())
             self.network_sync_counter = 0
@@ -88,9 +94,9 @@ class DQN_Agent:
         target_return = rn + self.gamma * q_next
         
         loss = self.loss_fn(pred_return, target_return)
-        self.optimizer.zero_grad()
-        loss.backward(retain_graph=True)
-        self.optimizer.step()
-        
         self.network_sync_counter += 1       
-        return loss.item()
+        return loss
+
+    def save(self, path):
+        print(f'model saved at {path}')
+        torch.save(self.q_net.state_dict(), path)

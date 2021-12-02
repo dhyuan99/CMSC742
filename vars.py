@@ -7,3 +7,8 @@ SYNC_FREQ = 5
 N_EPISODES = 10000
 EXP_REPLAY_SIZE = 256
 LR = 1e-3
+HIDDEN_LAYER_SIZE = 64
+
+# Below is for attacker training.
+NUM_LAYERS = 2
+NORM_BOUND = 100
