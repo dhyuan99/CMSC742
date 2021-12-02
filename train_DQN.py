@@ -1,4 +1,5 @@
 import gym
+import torch
 from Agent import Agent
 from vars import *
 import matplotlib.pyplot as plt
@@ -30,10 +31,14 @@ for i in range(N_EPISODES):
         if(index > EXP_REPLAY_SIZE / 2):
             index = 0
             for _ in range(4):
-                loss = agent.compute_loss(batch_size=BATCH_SIZE)
+                q_loss, reg_loss = agent.compute_loss(batch_size=BATCH_SIZE, reg={'K': 3, 'gamma': 2, 'sigma': 0.5, 'lambda': 0.01})
+                loss = q_loss + reg_loss
                 agent.optimizer.zero_grad()
                 loss.backward(retain_graph=True)
                 agent.optimizer.step()
+
+    if i % 100 == 0:         
+        print(f'episode {i}: {q_loss.item()}, {reg_loss.item()}.')
 
     if epsilon > EPS_END:
         epsilon -= (1 / EPS_DECAY)
