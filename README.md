@@ -24,8 +24,8 @@ We use CartPole as the environment setting and show the randomized smoothing doe
 
 4. Attack the normal agent:
 
-`python train_attacker.py -attack_config configs/attack.json -agent_config configs/normal.json`
+`python train_attacker.py -attack_config configs/attack.json -agent_config configs/normal.json` -norm_bound 5
 
 5. Attack the robust agent:
 
-`python train_attacker.py -attack_config configs/attack.json -agent_config configs/robust.json`
+`python train_attacker.py -attack_config configs/attack.json -agent_config configs/robust.json` -norm_bound 5
