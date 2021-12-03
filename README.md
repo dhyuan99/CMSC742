@@ -35,9 +35,7 @@ We use CartPole as the environment setting and show the randomized smoothing doe
 `sh normal_experiment.sh` and `sh robust_experiment.sh`.
 
 The training curve of the normal agent:
-
 ![normal agent](figs/agent_normal.jpg)
 
 The training curve of the robust agent:
-
 ![robust agent](figs/agent_robust.jpg)
