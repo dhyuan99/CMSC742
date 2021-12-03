@@ -55,10 +55,10 @@ class Agent:
         else:
             with torch.no_grad():
                 x = torch.from_numpy(state).float()
-                for i in range(len(self.q_net)-2):
+                for i in range(len(self.q_net)-3):
                     x = self.q_net[i](x)
                 x += attacker(x)
-                Qp = self.q_net[-1](self.q_net[-2](x))
+                Qp = self.q_net[-1](self.q_net[-2](self.q_net[-3](x)))
             _, A = torch.max(Qp, axis=0)
             A = A if torch.rand(1,).item() > epsilon else torch.randint(0, action_space_len, (1,))
             return A

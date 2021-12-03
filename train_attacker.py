@@ -12,6 +12,7 @@ import json
 parser = argparse.ArgumentParser(description='Please provide the config file.')
 parser.add_argument('-attack_config', type=str, help='the path to the attacker config file')
 parser.add_argument('-agent_config', type=str, help='the path to the agent config file')
+parser.add_argument('-norm_bound', type=float, help='enter the norm bound.')
 args = parser.parse_args()
 with open(args.attack_config) as f:
     attack_cfg = json.load(f)
@@ -29,7 +30,7 @@ agent = Agent(seed=1423,
     exp_replay_size=agent_cfg['exp_replay_size'],
     gamma=agent_cfg['gamma'])
 agent.q_net.load_state_dict(torch.load(agent_cfg['savepath']))
-attacker = Attacker(hidden_layer_size=agent_cfg['hidden_layer_size'], norm_bound=attack_cfg['norm_bound'], num_layers=attack_cfg['num_layers'])
+attacker = Attacker(hidden_layer_size=agent_cfg['hidden_layer_size'], norm_bound=args.norm_bound, num_layers=attack_cfg['num_layers'])
 optimizer = torch.optim.Adam(attacker.parameters(), lr=attack_cfg['lr'])
 
 durations = []
@@ -76,6 +77,6 @@ for i in range(1000):
         A =  agent.get_action(obs, env.action_space.n, epsilon=0, attacker=best_attacker)
         obs, reward, done, _ = env.step(A.item())
         r += 1
-print(f'Try 1000 episodes. Average reward is {r / 1000}.')
+print(f'Norm bound is {args.norm_bound}. Try 1000 episodes. Average reward is {r / 1000}.')
 
 torch.save(best_attacker.state_dict(), attack_cfg["savepath"])
