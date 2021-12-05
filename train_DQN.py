@@ -18,7 +18,7 @@ env = gym.make('CartPole-v0')
 input_dim = env.observation_space.shape[0]
 output_dim = env.action_space.n
 agent = Agent(seed=args.seed,
-    layer_sizes=[input_dim, config['hidden_layer_size'], output_dim], 
+    layer_sizes=[input_dim, config['hidden_layer_size'], 16, output_dim], 
     lr=config['lr'], 
     sync_freq=config['sync_freq'], 
     exp_replay_size=config['exp_replay_size'],
