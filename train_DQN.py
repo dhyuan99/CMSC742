@@ -1,6 +1,6 @@
 import gym
+import torch
 from Agent import Agent
-from vars import *
 import matplotlib.pyplot as plt
 import copy
 from statsmodels.tsa.api import SimpleExpSmoothing
@@ -9,6 +9,7 @@ import json
 
 parser = argparse.ArgumentParser(description='Please provide the config file.')
 parser.add_argument('-config', type=str, help='the path to the config file')
+parser.add_argument('-seed', type=int, help='the path to the config file')
 args = parser.parse_args()
 with open(args.config) as f:
     config = json.load(f)
@@ -16,13 +17,15 @@ with open(args.config) as f:
 env = gym.make('CartPole-v0')
 input_dim = env.observation_space.shape[0]
 output_dim = env.action_space.n
-agent = Agent(seed=1423,  
+agent = Agent(seed=args.seed,
     layer_sizes=[input_dim, config['hidden_layer_size'], output_dim], 
     lr=config['lr'], 
     sync_freq=config['sync_freq'], 
     exp_replay_size=config['exp_replay_size'],
     gamma=config['gamma'])
 agent.initialize(env)
+if args.reg is not None:
+    agent.q_net.load_state_dict(torch.load('models/agent_normal.pth'))
 
 durations = []
 index = config['exp_replay_size'] / 2
@@ -49,9 +52,9 @@ for i in range(config['n_episodes']):
                 loss.backward(retain_graph=True)
                 agent.optimizer.step()
 
-    if i % 100 == 0:         
-        print(f'episode {i}, q_loss: {q_loss.item()}, reg_loss: {reg_loss.item() if reg_loss is not None else None}')
-        pass
+    # if i % 100 == 0:         
+    #     print(f'episode {i}, q_loss: {q_loss.item()}, reg_loss: {reg_loss.item() if reg_loss is not None else None}')
+    #     pass
 
     if epsilon > config['eps_end']:
         epsilon -= (1 / config['eps_decay'])
@@ -78,5 +81,5 @@ for i in range(1000):
         obs, reward, done, _ = env.step(A.item())
         r += 1
 
-print(f"Try 1000 episodes. Average reward is {r / 1000}.")
+print(f"Seed: {args.seed}. Try 1000 episodes. Average reward is {r / 1000}.")
 agent.save(config['savepath'])
