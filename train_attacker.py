@@ -2,7 +2,6 @@ from Agent import Agent
 from Attacker import Attacker
 import gym
 import torch
-from vars import *
 import matplotlib.pyplot as plt
 import copy
 from statsmodels.tsa.api import SimpleExpSmoothing
@@ -48,10 +47,10 @@ for i in range(attack_cfg['n_episodes']):
         obs = obs_next
         index += 1
         
-        if(index > EXP_REPLAY_SIZE / 2):
+        if(index > agent_cfg['exp_replay_size'] / 2):
             index = 0
             for _ in range(4):
-                loss, _ = agent.compute_loss(batch_size=BATCH_SIZE)
+                loss, _ = agent.compute_loss(batch_size=agent_cfg['batch_size'])
                 optimizer.zero_grad()
                 (-loss).backward(retain_graph=True)
                 optimizer.step()

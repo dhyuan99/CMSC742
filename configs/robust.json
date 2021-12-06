@@ -9,7 +9,7 @@
     "eps_start": 1,
     "eps_end": 0.05,
     "eps_decay": 5000,
-    "n_episodes": 50000,
+    "n_episodes": 20000,
     "batch_size": 16,
-    "reg": {"K": 3, "gamma": 1, "sigma": 0.5, "lambda": 0.01}
+    "reg": {"K": 5, "gamma": 1, "sigma": 0.1, "lambda": 0.1}
 }

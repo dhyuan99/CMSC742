@@ -12,6 +12,7 @@ class Agent:
         self.target_net = copy.deepcopy(self.q_net)
         self.loss_fn = torch.nn.MSELoss()
         self.optimizer = torch.optim.Adam(self.q_net.parameters(), lr=lr)
+        self.optimizer_last_layer = torch.optim.Adam(self.q_net[-2].parameters(), lr=lr)
         
         self.network_sync_freq = sync_freq
         self.network_sync_counter = 0
@@ -102,10 +103,11 @@ class Agent:
         reg_loss = None
         if reg:
             K, sigma, gamma, lambd = reg['K'], reg['sigma'], reg['gamma'], reg['lambda']
-            for i in range(len(self.q_net)-2):
-                s = self.q_net[i](s)
             si = [s+torch.randn(size=s.shape) * sigma for _ in range(K)]
-            ai = [self.q_net[-1](self.q_net[-2](s)) for s in si]
+            # for i in range(len(self.q_net)-2):
+            #     s = self.q_net[i](s)
+            s = self.q_net(s)
+            ai = [self.q_net(s) for s in si]
             ai = [torch.exp(a) / torch.sum(torch.exp(a), axis=1, keepdim=True) for a in ai]
             ai = torch.stack(ai, axis=2)
             eps = 1e-3
